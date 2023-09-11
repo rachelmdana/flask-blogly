@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}All Users{% endblock %}
+
+{% block page_title %}All Users{% endblock %}
+
+{% block content %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.first_name }}</td>
+            <td>{{ user.last_name }}</td>
+            <td><a href="{{ url_for('show_user', user_id=user.id) }}" class="btn btn-primary btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('show_add_user_form') }}" class="btn btn-success">Add User</a>
+{% endblock %}
