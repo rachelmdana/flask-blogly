@@ -15,18 +15,13 @@ class User(db.Model):
 
     __tablename__ = 'users'
 
-    id = db.Column(db.Integer,
-                   primary_key=True,
-                   autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    image_url = db.Column(db.String(200), default='/static/default-profile-image.jpg')
 
-    first_name = db.Column(db.String(50),
-                           nullable=False)
-
-    last_name = db.Column(db.String(50),
-                          nullable=False)
-
-    image_url = db.Column(db.String(200),
-                          default='/static/default-profile-image.jpg')
+    # Define a many-to-one relationship with posts
+    posts = db.relationship('Post', backref='user', cascade='all, delete-orphan')
 
     def __repr__(self):
         """Show info about the user."""
@@ -37,25 +32,35 @@ class Post(db.Model):
 
     __tablename__ = 'posts'
 
-    id = db.Column(db.Integer,
-                   primary_key=True,
-                   autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
-    title = db.Column(db.String(100),
-                     nullable=False)
-
-    content = db.Column(db.Text,
-                       nullable=False)
-
-    created_at = db.Column(db.DateTime,
-                           default=datetime.utcnow)
-
-    user_id = db.Column(db.Integer,
-                        db.ForeignKey('users.id'),
-                        nullable=False)
-
-    user = db.relationship('User', backref='posts')
+    tags = db.relationship('Tag', secondary='post_tags', back_populates='posts')
 
     def __repr__(self):
         """Show info about the post."""
         return f"<Post id={self.id} title={self.title} created_at={self.created_at}>"
+
+class Tag(db.Model):
+    """Tag Model for posts"""
+    __tablename__ = 'tags'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+
+    # Define a many-to-many relationship with posts using a secondary table
+    posts = db.relationship('Post', secondary='post_tags', back_populates='tags')
+
+class PostTag(db.Model):
+    '''Join table between Posts and Tags'''
+    __tablename__ = 'post_tags'
+
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), primary_key=True, nullable=False)
+    tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'), primary_key=True, nullable=False)
+
+    # Define relationships between PostTag, Post, and Tag
+    post = db.relationship('Post', backref='post_tags')
+    tag = db.relationship('Tag', backref='post_tags')

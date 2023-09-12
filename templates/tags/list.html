@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}All Tags{% endblock %}
+
+{% block page_title %}All Tags{% endblock %}
+
+{% block content %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tag Name</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tag in tags %}
+        <tr>
+            <td>{{ tag.id }}</td>
+            <td>{{ tag.name }}</td>
+            <td><a href="{{ url_for('show_tag', tag_id=tag.id) }}" class="btn btn-primary btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('show_add_tag_form') }}" class="btn btn-primary">Add Tag</a>
+{% endblock %}

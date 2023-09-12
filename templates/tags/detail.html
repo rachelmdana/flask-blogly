@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Tag Details{% endblock %}
+
+{% block content %}
+<h1>Tag Details</h1>
+<p>Tag Name: {{ tag.name }}</p>
+
+<h2>Posts with this Tag</h2>
+<ul>
+    {% for post in tag.posts %}
+    <li>
+        <strong>{{ post.post.title }}</strong><br>
+        {{ post.post.content }}
+        <p>Created at: {{ post.post.created_at }}</p>
+        <a href="{{ url_for('show_post', post_id=post.post.id) }}">View Post</a>
+    </li>
+    {% endfor %}
+</ul>
+
+<div class="button-group">
+    <a href="{{ url_for('show_edit_tag_form', tag_id=tag.id) }}" class="btn btn-primary">Edit Tag</a>
+    <br>
+    <form method="POST" action="{{ url_for('delete_tag', tag_id=tag.id) }}">
+        <button type="submit" class="btn btn-danger">Delete Tag</button>
+    </form>
+    <br>
+    <a href="{{ url_for('list_tags') }}" class="btn btn-secondary">Back to Tags</a>
+</div>
+{% endblock %}
