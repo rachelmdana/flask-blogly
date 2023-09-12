@@ -126,6 +126,7 @@ def edit_post(post_id):
 def delete_user(user_id):
     try:
         user = User.query.get_or_404(user_id)
+        Post.query.filter_by(user_id=user_id).delete()
         db.session.delete(user)
         db.session.commit()
         
