@@ -6,8 +6,6 @@
 
 {% block content %}
 <form method="POST" action="{{ url_for('edit_user', user_id=user.id) }}">
-    <!-- Add form fields for editing user data -->
-    <!-- Example: -->
     <div class="form-group">
         <label for="first_name">First Name</label>
         <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}"
@@ -16,6 +14,11 @@
     <div class="form-group">
         <label for="last_name">Last Name</label>
         <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+    </div>
+    <!-- Add an input field for the Image URL -->
+    <div class="form-group">
+        <label for="image_url">Image URL</label>
+        <input type="text" class="form-control" id="image_url" name="image_url" value="{{ user.image_url }}">
     </div>
     <button type="submit" class="btn btn-primary">Save Changes</button>
     <a href="{{ url_for('show_user', user_id=user.id) }}" class="btn btn-secondary">Cancel</a>

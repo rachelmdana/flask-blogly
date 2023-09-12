@@ -2,7 +2,7 @@
 
 from flask import Flask, redirect, url_for, render_template, request
 from flask_debugtoolbar import DebugToolbarExtension
-from models import db, connect_db, User
+from models import db, connect_db, User, Post
 from sqlalchemy.exc import SQLAlchemyError
 
 app = Flask(__name__)
@@ -31,7 +31,6 @@ def index():
 
 @app.route('/users')
 def show_all_users():
-    # Fetch all users from the database
     users = User.query.all()
     return render_template('users/list.html', users=users)
 
@@ -42,42 +41,109 @@ def show_add_user_form():
 @app.route('/users/new', methods=['POST'])
 def add_user():
     try:
-        # Process the form data and create a new user
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
-        image_url = request.form.get('image_url')  # Retrieve the image URL
-        
-        new_user = User(first_name=first_name, last_name=last_name, image_url=image_url)  # Include image_url
-        
-        db.session.add(new_user)  # Add the new user to the session
-        db.session.commit()  # Commit the transaction to save the new user
-        
+        image_url = request.form.get('image_url')
+
+        new_user = User(first_name=first_name, last_name=last_name, image_url=image_url) 
+
+        db.session.add(new_user)
+        db.session.commit() 
         return redirect(url_for('show_all_users'))
+    
     except SQLAlchemyError as e:
-        # Handle the error, log it, and possibly rollback the transaction
+        db.session.rollback()
+        print(f"Error: {str(e)}")
+        return render_template('error.html', error_message="An error occurred while adding the user")
+
+
+@app.route('/users/<int:user_id>/posts/new')
+def show_new_post_form(user_id):
+    user = User.query.get_or_404(user_id)
+    return render_template ('posts/add.html', user=user)
+
+@app.route('/users/<int:user_id>/posts/new', methods=['POST'])
+def add_post(user_id):
+    try:
+        user = User.query.get_or_404(user_id)
+        title = request.form.get('title')
+        content = request.form.get('content')
+
+        new_post = Post(title=title, content=content, user=user)
+
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect(url_for('show_user', user_id=user_id))
+    
+    except SQLAlchemyError as e:
         db.session.rollback()
         print(f"Error: {str(e)}")
 
+    return render_template('error.html', error_message="An error occurred while adding the post")
+
 @app.route('/users/<int:user_id>')
 def show_user(user_id):
-    # Fetch the user by user_id from the database
     user = User.query.get_or_404(user_id)
-    return render_template('users/detail.html', user=user)
+    print(user.first_name, user.last_name)
+    posts = Post.query.filter_by(user_id=user_id).all()
+    return render_template('users/detail.html', user=user, posts=posts)
+
+@app.route('/posts/<int:post_id>')
+def show_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    return render_template('posts/detail.html', post=post)
 
 @app.route('/users/<int:user_id>/edit')
 def show_edit_user_form(user_id):
-    # Fetch the user by user_id from the database
     user = User.query.get_or_404(user_id)
     return render_template('users/edit.html', user=user)
 
 @app.route('/users/<int:user_id>/edit', methods=['POST'])
 def edit_user(user_id):
-    # Process the form data and update the user in the database
-    # Redirect to the user's detail page after editing
     return redirect(url_for('show_user', user_id=user_id))
+
+@app.route('/posts/<int:post_id>/edit')
+def show_edit_post_form(post_id):
+    post = Post.query.get_or_404(post_id)
+    return render_template('posts/edit.html', post=post)
+
+@app.route('/posts/<int:post_id>/edit', methods=['POST'])
+def edit_post(post_id):
+    try:
+        post = Post.query.get_or_404(post_id)
+        post.title = request.form.get('title')
+        post.content = request.form.get('content')
+
+        db.session.commit()
+        
+        return redirect(url_for('show_post', post_id=post_id))
+    
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        print(f"Error: {str(e)}")
 
 @app.route('/users/<int:user_id>/delete', methods=['POST'])
 def delete_user(user_id):
-    # Delete the user by user_id from the database
-    # Redirect to the list of users after deletion
-    return redirect(url_for('show_all_users'))
+    try:
+        user = User.query.get_or_404(user_id)
+        db.session.delete(user)
+        db.session.commit()
+        
+        return redirect(url_for('show_all_users'))
+    
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        print(f"Error: {str(e)}")
+        return render_template('error.html', error_message="An error occurred while deleting the user")
+
+
+@app.route('/posts/<int:post_id>/delete', methods=['POST'])
+def delete_post(post_id):
+    try:
+        post = Post.query.get_or_404(post_id)
+        db.session.delete(post)
+        db.session.commit()
+        return redirect(url_for('show_user', user_id=post.user_id))
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        print(f"Error: {str(e)}")

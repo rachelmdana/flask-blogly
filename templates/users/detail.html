@@ -2,15 +2,32 @@
 
 {% block title %}User Details{% endblock %}
 
-{% block page_title %}User Details{% endblock %}
-
 {% block content %}
-<h2>User ID: {{ user.id }}</h2>
-<p><strong>First Name:</strong> {{ user.first_name }}</p>
-<p><strong>Last Name:</strong> {{ user.last_name }}</p>
-<a href="{{ url_for('show_edit_user_form', user_id=user.id) }}" class="btn btn-primary">Edit User</a>
-<form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" style="display: inline;">
-    <button type="submit" class="btn btn-danger">Delete User</button>
-</form>
-<a href="{{ url_for('show_all_users') }}" class="btn btn-secondary">Back to Users</a>
+<h1>User Details</h1>
+<p>Name: {{ user.first_name }} {{ user.last_name }}</p>
+<p>Image: <img src="{{ user.image_url }}" alt="{{ user.full_name }}"></p>
+
+<h2>Posts</h2>
+<ul>
+    {% for post in posts %}
+    <li>
+        <strong>{{ post.title }}</strong><br>
+        {{ post.content }}
+        <p>Created at: {{ post.created_at }}</p>
+        <a href="{{ url_for('show_post', post_id=post.id) }}">View Post</a>
+    </li>
+    {% endfor %}
+</ul>
+
+<div class="button-group">
+    <a href="{{ url_for('show_new_post_form', user_id=user.id) }}" class="btn btn-primary">New Post</a>
+    <br>
+    <a href="{{ url_for('edit_user', user_id=user.id) }}" class="btn btn-primary">Edit Profile</a>
+    <br>
+    <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}">
+        <button type="submit" class="btn btn-danger">Delete User</button>
+    </form>
+    <br>
+    <a href="{{ url_for('show_all_users') }}" class="btn btn-secondary">Back to Users</a>
+</div>
 {% endblock %}
