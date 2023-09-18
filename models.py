@@ -20,7 +20,7 @@ class User(db.Model):
     last_name = db.Column(db.String(50), nullable=False)
     image_url = db.Column(db.String(200), default='/static/default-profile-image.jpg')
 
-    # Define a many-to-one relationship with posts
+    tags = db.relationship('Tag', secondary='user_tags', back_populates='users')
     posts = db.relationship('Post', backref='user', cascade='all, delete-orphan')
 
     def __repr__(self):
@@ -53,6 +53,7 @@ class Tag(db.Model):
 
     # Define a many-to-many relationship with posts using a secondary table
     posts = db.relationship('Post', secondary='post_tags', back_populates='tags')
+    users = db.relationship('User', secondary='user_tags', back_populates='tags')
 
 class PostTag(db.Model):
     '''Join table between Posts and Tags'''
@@ -64,3 +65,8 @@ class PostTag(db.Model):
     # Define relationships between PostTag, Post, and Tag
     post = db.relationship('Post', backref='post_tags')
     tag = db.relationship('Tag', backref='post_tags')
+
+class UserTag(db.Model):
+    __tablename__ = 'user_tags'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'), primary_key=True)

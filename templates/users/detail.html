@@ -19,15 +19,26 @@
     {% endfor %}
 </ul>
 
+<h3>Tags:</h3>
+<ul>
+    {% for tag in user.tags %}
+    <li>{{ tag.name }}</li>
+    {% endfor %}
+</ul>
+
+<h2>Add a New Tag</h2>
+<form method="POST" action="{{ url_for('add_tag_to_user', user_id=user.id) }}">
+    <label for="name">Tag Name:</label>
+    <input type="text" name="name" id="name" placeholder="Enter tag name" required>
+    <button type="submit" class="btn btn-primary">Add Tag</button>
+</form>
+
 <div class="button-group">
     <a href="{{ url_for('show_new_post_form', user_id=user.id) }}" class="btn btn-primary">New Post</a>
-    <br>
     <a href="{{ url_for('edit_user', user_id=user.id) }}" class="btn btn-primary">Edit Profile</a>
-    <br>
     <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}">
         <button type="submit" class="btn btn-danger">Delete User</button>
     </form>
-    <br>
     <a href="{{ url_for('show_all_users') }}" class="btn btn-secondary">Back to Users</a>
 </div>
 {% endblock %}

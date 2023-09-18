@@ -17,8 +17,6 @@ toolbar = DebugToolbarExtension(app)
 
 
 connect_db(app)
-
-
 with app.app_context():
     db.create_all()
 
@@ -100,18 +98,55 @@ def add_post(user_id):
 def show_add_tag_form():
     return render_template('tags/add.html')
 
-@app.route('/users/<int:user_id>/tags/new', methods=["POST"])
-def add_tag():
+@app.route('/tags', methods=['GET', 'POST'])
+def manage_tags():
+    if request.method == 'POST':
+        try:
+            name = request.form.get('name')
+            new_tag = Tag(name=name)
+            db.session.add(new_tag)
+            db.session.commit()
+            flash('Tag created successfully', 'success')
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error: {str(e)}")
+            flash('An error occurred while adding the tag', 'error')
+    
+    tags = Tag.query.all()
+    return render_template('tags/manage.html', tags=tags)
+
+@app.route('/users/<int:user_id>/tags/add', methods=['POST'])
+def add_tag_to_user(user_id):
     try:
-        name = request.form.get('name')
-        new_tag = Tag(name=name)
-        db.session.add(new_tag)
+        user = User.query.get_or_404(user_id)
+        tag_name = request.form.get('name')
+
+        # Create a new tag and associate it with the user
+        new_tag = Tag(name=tag_name)
+        user.tags.append(new_tag)
+
         db.session.commit()
-        return redirect(url_for('list_tags'))
+        return redirect(url_for('show_user', user_id=user_id))
+
     except SQLAlchemyError as e:
         db.session.rollback()
         print(f"Error: {str(e)}")
-        return render_template('error.html', error_message="An error occurred while adding the tag")
+        return render_template('error.html', error_message="An error occurred while adding the tag to the user")
+
+@app.route('/posts/<int:post_id>/tags/new', methods=["POST"])
+def add_tag_to_post(post_id):
+    try:
+        name = request.form.get('tags')
+        post = Post.query.get_or_404(post_id)
+        new_tag = Tag(name=name)
+        db.session.add(new_tag)
+        post.tags.append(new_tag)
+        db.session.commit()
+        return redirect(url_for('show_post', post_id=post_id))
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        print(f"Error: {str(e)}")
+        return render_template('error.html', error_message="An error occurred while adding the tag to the post")
 
 @app.route('/users/<int:user_id>')
 def show_user(user_id):

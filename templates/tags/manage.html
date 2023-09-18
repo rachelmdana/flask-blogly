@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Tags{% endblock %}
+
+{% block content %}
+<h1>Manage Tags</h1>
+
+
+<h2>Existing Tags</h2>
+<ul>
+    {% for tag in tags %}
+    <li>{{ tag.name }}</li>
+    {% endfor %}
+</ul>
+
+
+<h2>Create New Tag</h2>
+<form method="POST" action="{{ url_for('manage_tags') }}">
+    <div class="form-group">
+        <label for="name">Tag Name:</label>
+        <input type="text" name="name" id="name" placeholder="Enter tag name" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Create Tag</button>
+</form>
+
+
+<!-- {% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="alert alert-success">
+    {% for message in messages %}
+    {{ message }}
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %} -->
+
+<a href="{{ url_for('homepage') }}" class="btn btn-secondary">Back</a>
+{% endblock %}

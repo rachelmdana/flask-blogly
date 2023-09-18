@@ -20,5 +20,6 @@
     {% endfor %}
 </div>
 <br>
+<a href="{{ url_for('add_tag', user_id=user.id) }}" class="btn btn-primary">Add Tag</a>
 <a href="{{ url_for('list_tags') }}" class="btn btn-secondary">Cancel</a>
 {% endblock %}
